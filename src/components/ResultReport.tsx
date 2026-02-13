@@ -41,9 +41,9 @@ function humanizeEmployerSize(band: UserProfile["employerSizeBand"]) {
     case "lt20":
       return "Fewer than 20 employees";
     case "unknown":
-      return "Unknown / not sure";
+      return "Not sure";
     default:
-      return "Not provided";
+      return "Not sure";
   }
 }
 
@@ -71,16 +71,16 @@ function statusUi(status: DecisionResult["status"]) {
       : "bg-[#d97706] text-white";
 
   const label = isSafe
-    ? "LIKELY SAFE TO DELAY"
+    ? "Delay likely appropriate"
     : isNotSafe
-      ? "LIKELY NOT SAFE TO DELAY"
-      : "NEEDS HUMAN REVIEW";
+      ? "Caution advised"
+      : "Needs confirmation";
 
   const summary = isSafe
-    ? "Based on what you entered, you can likely delay Part B without penalty — but confirm with HR or Medicare before deciding."
+    ? "Based on your answers, delaying Part B may be reasonable. Here's what to confirm to avoid surprises."
     : isNotSafe
-      ? "Based on what you entered, delaying Part B could expose you to late-enrollment penalties. Verify immediately before waiting."
-      : "Your situation doesn’t cleanly match standard delay rules. Confirm directly with Medicare or a licensed advisor.";
+      ? "Based on your answers, delaying Part B may expose you to late-enrollment penalties. Here's what to confirm before deciding."
+      : "Your situation doesn’t fit a standard pattern. Here's what to gather and who to ask.";
 
   return { bandClass, bgClass, pillClass, label, summary };
 }
@@ -96,29 +96,20 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Executive Summary */}
       <div className={`rounded-2xl shadow-sm ${ui.bandClass} ${ui.bgClass} p-7`}>
-        <div className="flex items-start justify-between gap-6">
-          <div className="min-w-0">
-            <div
-              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${ui.pillClass}`}
-            >
-              {ui.label}
-            </div>
-
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900">
-              {result.headline}
-            </h2>
-
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-900">
-              {ui.summary}
-            </p>
+        <div>
+          <div
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${ui.pillClass}`}
+          >
+            {ui.label}
           </div>
 
-          <button
-            onClick={() => window.print()}
-            className="shrink-0 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-          >
-            Print / Save
-          </button>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900">
+            {result.headline}
+          </h2>
+
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-900">
+            {ui.summary}
+          </p>
         </div>
 
         <div className="mt-6">
@@ -137,13 +128,13 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
           onClick={onReviewAnswers}
           className="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-medium text-white hover:opacity-90"
         >
-          Review my answers
+          Review or change my answers
         </button>
         <button
           onClick={() => window.print()}
           className="rounded-xl border border-zinc-300 bg-white px-6 py-3 text-sm font-medium text-zinc-900"
         >
-          Print this summary
+          Print / Save as PDF
         </button>
       </div>
 
@@ -196,7 +187,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
         {/* Questions to ask */}
         <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200/70">
           <h3 className="relative pl-4 text-lg font-semibold text-zinc-900 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-full before:bg-blue-400">
-            Questions to ask
+            Questions to ask HR or Medicare
           </h3>
           <ul className="mt-3 list-disc space-y-1 pl-6 text-sm leading-6 text-zinc-800">
             {employerRelated ? (
@@ -241,7 +232,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
         {/* When to re-evaluate */}
         <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200/70">
           <h3 className="relative pl-4 text-lg font-semibold text-zinc-900 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-full before:bg-purple-400">
-            When to re-evaluate
+            When to re-check
           </h3>
           <ul className="mt-3 list-disc space-y-1 pl-6 text-sm leading-6 text-zinc-800">
             <li>If you stop working</li>
@@ -255,7 +246,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
       {/* Next steps - full width */}
       <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200/70">
         <h3 className="relative pl-4 text-lg font-semibold text-zinc-900 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-full before:bg-emerald-400">
-          Next steps
+          Recommended next steps
         </h3>
         <ul className="mt-3 list-disc space-y-1 pl-6 text-sm leading-6 text-zinc-800">
           {result.nextSteps.map((n, i) => (
@@ -276,7 +267,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
       </div>
 
       <div className="pb-6 text-xs leading-5 text-zinc-500">
-        This is educational guidance and not legal or medical advice. Always confirm enrollment
+        This is educational guidance—not legal or medical advice. Always confirm enrollment
         decisions with Medicare or a licensed advisor.
       </div>
     </div>

@@ -52,7 +52,7 @@ function buildProfile(
 }
 
 export default function Home() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1);
 
   const [age, setAge] = useState<string>("");
   const [currentlyWorking, setCurrentlyWorking] = useState<boolean | null>(null);
@@ -100,6 +100,16 @@ export default function Home() {
     setStep(step + 1);
   };
 
+  const resetToLanding = () => {
+    setResult(null);
+    setStep(-1);
+    setAge("");
+    setCurrentlyWorking(null);
+    setCoverageSource("");
+    setEmployerSizeBand("");
+    setContributingToHSA(null);
+  };
+
   const goBack = () => {
     if (step === 5) {
       // back from result goes to HSA step
@@ -124,9 +134,45 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 p-6">
       <div className="mx-auto max-w-xl">
-        <h1 className="mb-10 text-2xl font-bold text-zinc-900">
-          Can I Safely Delay Medicare Part B?
-        </h1>
+        {/* Landing Screen */}
+        {step === -1 && (
+          <div className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70">
+            <p className="mb-3 text-sm font-medium text-zinc-500">
+              Medicare decision check (65+)
+            </p>
+            <h1 className="mb-4 text-3xl font-bold text-zinc-900">
+              Should you delay Medicare Part B?
+            </h1>
+            <p className="mb-6 text-base leading-7 text-zinc-700">
+              Answer a few questions and get a clear, printable summary of what to confirm before
+              you delay — especially if you're working or covered by an employer plan.
+            </p>
+            <ul className="mb-8 space-y-2 text-sm text-zinc-700">
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-zinc-400">•</span>
+                <span>Avoid late-enrollment penalties</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-zinc-400">•</span>
+                <span>Understand when employer coverage counts</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-zinc-400">•</span>
+                <span>Know what to ask HR or Medicare</span>
+              </li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => setStep(0)}
+              className="rounded-2xl bg-zinc-900 px-7 py-3 text-sm font-medium text-white hover:opacity-90"
+            >
+              Start my check
+            </button>
+            <p className="mt-6 text-xs text-zinc-500">
+              Educational guidance — not legal advice.
+            </p>
+          </div>
+        )}
 
         {/* Step 0: Age */}
         {step === 0 && (
@@ -269,35 +315,34 @@ export default function Home() {
               employerSizeBand,
               contributingToHSA!
             )}
-            onReviewAnswers={() => {
-              setResult(null);
-              setStep(0);
-            }}
+            onReviewAnswers={resetToLanding}
           />
         )}
 
-        {/* Nav buttons (hidden on result because ResultReport includes print; you can add a Back button later if you want) */}
-        <div className="mt-10 flex gap-4">
-          {step > 0 && step < 5 && (
-            <button
-              type="button"
-              onClick={goBack}
-              className="rounded border border-zinc-300 bg-white px-4 py-2 text-zinc-700"
-            >
-              Back
-            </button>
-          )}
-          {step < 5 && (
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={!canNext}
-              className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50"
-            >
-              {step === 4 || (step === 3 && !showEmployerStep) ? "See result" : "Next"}
-            </button>
-          )}
-        </div>
+        {/* Nav buttons */}
+        {step >= 0 && (
+          <div className="mt-10 flex gap-4">
+            {step > 0 && step < 5 && (
+              <button
+                type="button"
+                onClick={goBack}
+                className="rounded border border-zinc-300 bg-white px-4 py-2 text-zinc-700"
+              >
+                Back
+              </button>
+            )}
+            {step < 5 && (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={!canNext}
+                className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50"
+              >
+                {step === 4 || (step === 3 && !showEmployerStep) ? "See result" : "Next"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
