@@ -1,65 +1,304 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { evaluate } from "@/lib/decisionEngine/evaluate";
+import type {
+  UserProfile,
+  CoverageSource,
+  EmployerSizeBand,
+  DecisionResult,
+} from "@/lib/decisionEngine/types";
+import ResultReport from "@/components/ResultReport";
+
+const COVERAGE_OPTIONS: { value: CoverageSource; label: string }[] = [
+  { value: "employer_self", label: "Employer (self)" },
+  { value: "employer_spouse", label: "Employer (spouse)" },
+  { value: "cobra", label: "COBRA" },
+  { value: "retiree", label: "Retiree" },
+  { value: "marketplace", label: "Marketplace" },
+  { value: "medicaid", label: "Medicaid" },
+  { value: "va", label: "VA" },
+  { value: "tricare", label: "TRICARE" },
+  { value: "none", label: "None" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const EMPLOYER_SIZE_OPTIONS: { value: EmployerSizeBand; label: string }[] = [
+  { value: "lt20", label: "Fewer than 20 employees" },
+  { value: "ge20", label: "20 or more employees" },
+  { value: "unknown", label: "Unknown" },
+];
+
+function buildProfile(
+  age: number,
+  currentlyWorking: boolean,
+  coverageSource: CoverageSource,
+  employerSizeBand: EmployerSizeBand | "",
+  contributingToHSA: boolean
+): UserProfile {
+  const profile: UserProfile = {
+    age,
+    currentlyWorking,
+    coverageSource,
+    contributingToHSA,
+  };
+
+  if (coverageSource === "employer_self" || coverageSource === "employer_spouse") {
+    profile.employerSizeBand =
+      employerSizeBand === "" ? undefined : (employerSizeBand as EmployerSizeBand);
+  }
+
+  return profile;
+}
 
 export default function Home() {
+  const [step, setStep] = useState(0);
+
+  const [age, setAge] = useState<string>("");
+  const [currentlyWorking, setCurrentlyWorking] = useState<boolean | null>(null);
+  const [coverageSource, setCoverageSource] = useState<CoverageSource | "">("");
+  const [employerSizeBand, setEmployerSizeBand] = useState<EmployerSizeBand | "">("");
+  const [contributingToHSA, setContributingToHSA] = useState<boolean | null>(null);
+
+  const [result, setResult] = useState<DecisionResult | null>(null);
+
+  const showEmployerStep =
+    coverageSource === "employer_self" || coverageSource === "employer_spouse";
+
+  // Step 0: age
+  // Step 1: currentlyWorking
+  // Step 2: coverageSource
+  // Step 3: employerSizeBand (if employer) OR contributingToHSA (if not employer)
+  // Step 4: contributingToHSA (only if employer)
+  // Step 5: result
+
+  const canNext = (() => {
+    if (step === 0) return age !== "" && !isNaN(Number(age)) && Number(age) >= 0;
+    if (step === 1) return currentlyWorking !== null;
+    if (step === 2) return coverageSource !== "";
+    if (step === 3 && showEmployerStep) return employerSizeBand !== "";
+    if (step === 3 && !showEmployerStep) return contributingToHSA !== null;
+    if (step === 4) return contributingToHSA !== null;
+    return false;
+  })();
+
+  const goNext = () => {
+    // If we're on the last question step, compute result
+    if (step === 4 || (step === 3 && !showEmployerStep)) {
+      const profile = buildProfile(
+        Number(age),
+        currentlyWorking!,
+        coverageSource as CoverageSource,
+        employerSizeBand,
+        contributingToHSA!
+      );
+      setResult(evaluate(profile));
+      setStep(5);
+      return;
+    }
+
+    setStep(step + 1);
+  };
+
+  const goBack = () => {
+    if (step === 5) {
+      // back from result goes to HSA step
+      setResult(null);
+      setStep(showEmployerStep ? 4 : 3);
+      return;
+    }
+
+    if (step === 4) {
+      setStep(3);
+      return;
+    }
+
+    if (step === 3 && showEmployerStep) {
+      setStep(2);
+      return;
+    }
+
+    setStep(step - 1);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-zinc-50 p-6">
+      <div className="mx-auto max-w-xl">
+        <h1 className="mb-10 text-2xl font-bold text-zinc-900">
+          Can I Safely Delay Medicare Part B?
+        </h1>
+
+        {/* Step 0: Age */}
+        {step === 0 && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700">Your age</label>
+            <input
+              type="number"
+              min={0}
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              className="w-full rounded border border-zinc-300 px-3 py-2 text-zinc-900"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+        )}
+
+        {/* Step 1: Working */}
+        {step === 1 && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700">
+              Are you currently working (or is your spouse working if coverage is through them)?
+            </label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setCurrentlyWorking(true)}
+                className={`rounded border px-4 py-2 ${
+                  currentlyWorking === true
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-zinc-300 bg-white text-zinc-700"
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentlyWorking(false)}
+                className={`rounded border px-4 py-2 ${
+                  currentlyWorking === false
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-zinc-300 bg-white text-zinc-700"
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Coverage Source */}
+        {step === 2 && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700">
+              Where is your current health coverage from?
+            </label>
+            <select
+              value={coverageSource}
+              onChange={(e) => {
+                const v = e.target.value as CoverageSource | "";
+                setCoverageSource(v);
+
+                // Prevent "sticky" employer size when switching away from employer coverage
+                if (v !== "employer_self" && v !== "employer_spouse") {
+                  setEmployerSizeBand("");
+                }
+              }}
+              className="w-full rounded border border-zinc-300 px-3 py-2 text-zinc-900"
+            >
+              <option value="">Select...</option>
+              {COVERAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Step 3: Employer Size (if employer coverage) */}
+        {step === 3 && showEmployerStep && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700">
+              Does the employer have 20 or more employees?
+            </label>
+            <select
+              value={employerSizeBand}
+              onChange={(e) => setEmployerSizeBand(e.target.value as EmployerSizeBand)}
+              className="w-full rounded border border-zinc-300 px-3 py-2 text-zinc-900"
+            >
+              <option value="">Select...</option>
+              {EMPLOYER_SIZE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Step 3 (if NOT employer) OR Step 4 (if employer): HSA */}
+        {((step === 3 && !showEmployerStep) || step === 4) && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700">
+              Are you currently contributing to an HSA?
+            </label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setContributingToHSA(true)}
+                className={`rounded border px-4 py-2 ${
+                  contributingToHSA === true
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-zinc-300 bg-white text-zinc-700"
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setContributingToHSA(false)}
+                className={`rounded border px-4 py-2 ${
+                  contributingToHSA === false
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-zinc-300 bg-white text-zinc-700"
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Result */}
+        {step === 5 && result && (
+          <ResultReport
+            result={result}
+            profile={buildProfile(
+              Number(age),
+              currentlyWorking!,
+              coverageSource as CoverageSource,
+              employerSizeBand,
+              contributingToHSA!
+            )}
+            onReviewAnswers={() => {
+              setResult(null);
+              setStep(0);
+            }}
+          />
+        )}
+
+        {/* Nav buttons (hidden on result because ResultReport includes print; you can add a Back button later if you want) */}
+        <div className="mt-10 flex gap-4">
+          {step > 0 && step < 5 && (
+            <button
+              type="button"
+              onClick={goBack}
+              className="rounded border border-zinc-300 bg-white px-4 py-2 text-zinc-700"
+            >
+              Back
+            </button>
+          )}
+          {step < 5 && (
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!canNext}
+              className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50"
+            >
+              {step === 4 || (step === 3 && !showEmployerStep) ? "See result" : "Next"}
+            </button>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
