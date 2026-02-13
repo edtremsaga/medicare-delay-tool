@@ -163,6 +163,7 @@ export default function Home() {
             </ul>
             <button
               type="button"
+              data-testid="wizard-start"
               onClick={() => setStep(0)}
               className="rounded-2xl bg-zinc-900 px-7 py-3 text-sm font-medium text-white hover:opacity-90"
             >
@@ -177,8 +178,9 @@ export default function Home() {
         {/* Step 0: Age */}
         {step === 0 && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700">Your age</label>
+            <label htmlFor="age" className="mb-2 block text-sm font-medium text-zinc-700">Your age</label>
             <input
+              id="age"
               type="number"
               min={0}
               value={age}
@@ -224,10 +226,11 @@ export default function Home() {
         {/* Step 2: Coverage Source */}
         {step === 2 && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700">
+            <label htmlFor="coverageSource" className="mb-2 block text-sm font-medium text-zinc-700">
               Where is your current health coverage from?
             </label>
             <select
+              id="coverageSource"
               value={coverageSource}
               onChange={(e) => {
                 const v = e.target.value as CoverageSource | "";
@@ -253,10 +256,11 @@ export default function Home() {
         {/* Step 3: Employer Size (if employer coverage) */}
         {step === 3 && showEmployerStep && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700">
+            <label htmlFor="employerSize" className="mb-2 block text-sm font-medium text-zinc-700">
               Does the employer have 20 or more employees?
             </label>
             <select
+              id="employerSize"
               value={employerSizeBand}
               onChange={(e) => setEmployerSizeBand(e.target.value as EmployerSizeBand)}
               className="w-full rounded border border-zinc-300 px-3 py-2 text-zinc-900"
@@ -325,6 +329,7 @@ export default function Home() {
             {step > 0 && step < 5 && (
               <button
                 type="button"
+                data-testid="wizard-back"
                 onClick={goBack}
                 className="rounded border border-zinc-300 bg-white px-4 py-2 text-zinc-700"
               >
@@ -334,6 +339,7 @@ export default function Home() {
             {step < 5 && (
               <button
                 type="button"
+                data-testid={step === 4 || (step === 3 && !showEmployerStep) ? "wizard-see-result" : "wizard-next"}
                 onClick={goNext}
                 disabled={!canNext}
                 className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50"
