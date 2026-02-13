@@ -91,9 +91,15 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
     profile.coverageSource === "employer_spouse";
 
   const ui = statusUi(result.status);
+  const generatedDate = new Date().toLocaleString();
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="print-root mx-auto max-w-3xl space-y-8">
+      {/* Print-only header */}
+      <div className="print-only print-header">
+        <h1>Medicare Part B Delay Check</h1>
+        <p>Generated: {generatedDate}</p>
+      </div>
       {/* Executive Summary */}
       <div className={`rounded-2xl shadow-sm ${ui.bandClass} ${ui.bgClass} p-7`}>
         <div>
@@ -123,7 +129,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
       </div>
 
       {/* CTA Buttons */}
-      <div className="mt-6 flex justify-center gap-4">
+      <div className="no-print mt-6 flex justify-center gap-4">
         <button
           onClick={onReviewAnswers}
           className="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-medium text-white hover:opacity-90"
@@ -134,7 +140,7 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
           onClick={() => window.print()}
           className="rounded-xl border border-zinc-300 bg-white px-6 py-3 text-sm font-medium text-zinc-900"
         >
-          Print / Save as PDF
+          Print or save as PDF
         </button>
       </div>
 
@@ -266,9 +272,15 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
         ) : null}
       </div>
 
-      <div className="pb-6 text-xs leading-5 text-zinc-500">
+      {/* Screen-only disclaimer */}
+      <div className="no-print pb-6 text-xs leading-5 text-zinc-500">
         This is educational guidance—not legal or medical advice. Always confirm enrollment
         decisions with Medicare or a licensed advisor.
+      </div>
+
+      {/* Print-only footer */}
+      <div className="print-only print-footer">
+        Educational guidance — confirm with Medicare or a licensed advisor.
       </div>
     </div>
   );
