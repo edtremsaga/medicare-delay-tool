@@ -131,3 +131,39 @@ test.describe("Medicare Part B Delay Check", () => {
     expect(printCalled).toBe(true);
   });
 });
+
+test.describe("Medicare Part D Coverage Check", () => {
+  test("Hub has Part D link/button", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByText("Part D Coverage Check")).toBeVisible();
+    await page.getByRole("link", { name: /Open Part D tool/i }).click();
+    await expect(page).toHaveURL(/\/part-d/);
+    await page.getByTestId("wizard-start").click();
+    await expect(page.getByRole("radio", { name: "Yes", exact: true })).toBeVisible();
+    await expect(page.getByRole("radio", { name: "No", exact: true })).toBeVisible();
+  });
+
+  test("Part D: Creditable + no gap => Delay likely appropriate", async ({ page }) => {
+    await page.goto("/part-d");
+    await page.getByTestId("wizard-start").click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
+    await page.getByTestId("wizard-next").click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
+    await page.getByTestId("wizard-next").click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
+    await page.getByTestId("wizard-see-result").click();
+    await expect(page.getByText("Delay likely appropriate")).toBeVisible();
+  });
+
+  test("Part D: Not sure coverage => Needs confirmation", async ({ page }) => {
+    await page.goto("/part-d");
+    await page.getByTestId("wizard-start").click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
+    await page.getByRole("radio", { name: "Not sure", exact: true }).click();
+    await page.getByTestId("wizard-next").click();
+    await page.getByRole("radio", { name: "Not sure", exact: true }).click();
+    await page.getByTestId("wizard-see-result").click();
+    await expect(page.getByText("Needs confirmation")).toBeVisible();
+  });
+});

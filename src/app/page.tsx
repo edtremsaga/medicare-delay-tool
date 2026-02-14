@@ -37,13 +37,12 @@ export default function Home() {
             <p className="mb-4 text-sm leading-6 text-zinc-700">
               Check whether your drug coverage meets Medicare's requirements and when to enroll.
             </p>
-            <button
-              type="button"
-              disabled
-              className="rounded-2xl bg-zinc-200 px-7 py-3 text-sm font-medium text-zinc-500 disabled:opacity-50"
+            <Link
+              href="/part-d"
+              className="inline-block rounded-2xl bg-zinc-900 px-7 py-3 text-sm font-medium text-white hover:opacity-90"
             >
-              Coming next
-            </button>
+              Open Part D tool
+            </Link>
           </section>
         </div>
       </div>
