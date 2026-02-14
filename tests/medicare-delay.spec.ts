@@ -1,15 +1,21 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Medicare Part B Delay Check", () => {
-  test("Employer 20+ → Delay likely appropriate", async ({ page }) => {
+  test("Hub loads and Part B link is present", async ({ page }) => {
     await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Medicare Decision Tools/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open Part B tool/i })).toBeVisible();
+  });
+
+  test("Employer 20+ → Delay likely appropriate", async ({ page }) => {
+    await page.goto("/part-b");
 
     await page.getByTestId("wizard-start").click();
 
     await page.getByLabel("Your age").fill("67");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "Yes" }).click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
     await page.getByTestId("wizard-next").click();
 
     await page.getByLabel("Where is your current health coverage from?").selectOption("Employer (self)");
@@ -18,20 +24,20 @@ test.describe("Medicare Part B Delay Check", () => {
     await page.getByLabel("Does the employer have 20 or more employees?").selectOption("20 or more employees");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "No" }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-see-result").click();
 
     await expect(page.getByText("Delay likely appropriate")).toBeVisible();
   });
 
   test("Employer <20 + HSA yes → Caution advised (edge case)", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/part-b");
     await page.getByTestId("wizard-start").click();
 
     await page.getByLabel("Your age").fill("67");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "Yes", exact: true }).click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
     await page.getByTestId("wizard-next").click();
 
     await page.getByLabel("Where is your current health coverage from?").selectOption("Employer (self)");
@@ -40,7 +46,7 @@ test.describe("Medicare Part B Delay Check", () => {
     await page.getByLabel("Does the employer have 20 or more employees?").selectOption("Fewer than 20 employees");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "Yes", exact: true }).click();
+    await page.getByRole("radio", { name: "Yes", exact: true }).click();
     await page.getByTestId("wizard-see-result").click();
 
     await expect(page.getByText("Caution advised")).toBeVisible();
@@ -48,7 +54,7 @@ test.describe("Medicare Part B Delay Check", () => {
   });
 
   test("Age step requires input before proceeding", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/part-b");
     await page.getByTestId("wizard-start").click();
 
     await expect(page.getByLabel("Your age")).toBeVisible();
@@ -58,40 +64,40 @@ test.describe("Medicare Part B Delay Check", () => {
   });
 
   test("COBRA → Caution advised", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/part-b");
 
     await page.getByTestId("wizard-start").click();
 
     await page.getByLabel("Your age").fill("66");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "No" }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-next").click();
 
     await page.getByLabel("Where is your current health coverage from?").selectOption("COBRA");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "No" }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-see-result").click();
 
     await expect(page.getByText("Caution advised")).toBeVisible();
   });
 
   test("Unknown coverage → Needs confirmation", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/part-b");
 
     await page.getByTestId("wizard-start").click();
 
     await page.getByLabel("Your age").fill("70");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "No" }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-next").click();
 
     await page.getByLabel("Where is your current health coverage from?").selectOption("Unknown");
     await page.getByTestId("wizard-next").click();
 
-    await page.getByRole("button", { name: "No" }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-see-result").click();
 
     await expect(page.getByText("Needs confirmation")).toBeVisible();
@@ -105,16 +111,16 @@ test.describe("Medicare Part B Delay Check", () => {
       };
     });
 
-    await page.goto("/");
+    await page.goto("/part-b");
 
     await page.getByTestId("wizard-start").click();
     await page.getByLabel("Your age").fill("66");
     await page.getByTestId("wizard-next").click();
-    await page.getByRole("button", { name: "No", exact: true }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-next").click();
     await page.getByLabel("Where is your current health coverage from?").selectOption("COBRA");
     await page.getByTestId("wizard-next").click();
-    await page.getByRole("button", { name: "No", exact: true }).click();
+    await page.getByRole("radio", { name: "No", exact: true }).click();
     await page.getByTestId("wizard-see-result").click();
 
     await expect(page.getByText("Caution advised")).toBeVisible();
