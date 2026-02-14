@@ -359,6 +359,10 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
         </ul>
       </div>
 
+      <p className="mt-6 text-xs text-zinc-500">
+        Method: Decision logic reflects Medicare's published guidance (see Medicare.gov links).
+      </p>
+
       {/* Screen-only disclaimer */}
       <div className="no-print pb-6 text-xs leading-5 text-zinc-500">
         This is educational guidance—not legal or medical advice. Always confirm enrollment
