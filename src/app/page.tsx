@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { evaluate } from "@/lib/decisionEngine/evaluate";
 import type {
   UserProfile,
@@ -64,6 +64,24 @@ export default function Home() {
 
   const showEmployerStep =
     coverageSource === "employer_self" || coverageSource === "employer_spouse";
+
+  const totalSteps = showEmployerStep ? 5 : 4;
+  const stepQuestionRef = useRef<HTMLDivElement>(null);
+
+  function getStepLabel(s: number): string {
+    if (s === 0) return "Your age";
+    if (s === 1) return "Working status";
+    if (s === 2) return "Coverage source";
+    if (s === 3) return showEmployerStep ? "Employer size" : "HSA contribution";
+    if (s === 4) return "HSA contribution";
+    return "";
+  }
+
+  useEffect(() => {
+    if (step >= 0 && step <= 4) {
+      stepQuestionRef.current?.focus();
+    }
+  }, [step]);
 
   // Step 0: age
   // Step 1: currentlyWorking
@@ -134,6 +152,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 p-6">
       <div className="mx-auto max-w-xl">
+        {/* Screen reader announcement when step changes */}
+        <div
+          aria-live="polite"
+          aria-atomic
+          className="sr-only"
+          role="status"
+        >
+          {step >= 0 && step <= 4
+            ? `Step ${step + 1} of ${totalSteps}: ${getStepLabel(step)}`
+            : ""}
+        </div>
+
         {/* Landing Screen */}
         {step === -1 && (
           <div className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70">
@@ -177,7 +207,14 @@ export default function Home() {
 
         {/* Step 0: Age */}
         {step === 0 && (
-          <div>
+          <div
+            ref={stepQuestionRef}
+            tabIndex={-1}
+            className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70 outline-none"
+          >
+            <p className="mb-1 text-sm font-medium text-zinc-500">
+              Step 1 of {totalSteps}
+            </p>
             <label htmlFor="age" className="mb-2 block text-sm font-medium text-zinc-700">Your age</label>
             <input
               id="age"
@@ -192,40 +229,78 @@ export default function Home() {
 
         {/* Step 1: Working */}
         {step === 1 && (
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700">
-              Are you currently working (or is your spouse working if coverage is through them)?
-            </label>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setCurrentlyWorking(true)}
-                className={`rounded border px-4 py-2 ${
-                  currentlyWorking === true
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-zinc-300 bg-white text-zinc-700"
-                }`}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentlyWorking(false)}
-                className={`rounded border px-4 py-2 ${
-                  currentlyWorking === false
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-zinc-300 bg-white text-zinc-700"
-                }`}
-              >
-                No
-              </button>
+          <div
+            ref={stepQuestionRef}
+            tabIndex={-1}
+            className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70 outline-none"
+          >
+            <p className="mb-1 text-sm font-medium text-zinc-500">
+              Step 2 of {totalSteps}
+            </p>
+            <div
+              role="radiogroup"
+              aria-label="Are you currently working (or is your spouse working if coverage is through them)?"
+              className="flex flex-col gap-2"
+            >
+              <label className="mb-2 block text-sm font-medium text-zinc-700">
+                Are you currently working (or is your spouse working if coverage is through them)?
+              </label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={currentlyWorking === true}
+                  onClick={() => setCurrentlyWorking(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setCurrentlyWorking(false);
+                      (e.currentTarget.nextElementSibling as HTMLButtonElement)?.focus();
+                    }
+                  }}
+                  className={`rounded border px-4 py-2 ${
+                    currentlyWorking === true
+                      ? "border-blue-600 bg-blue-50 text-blue-800"
+                      : "border-zinc-300 bg-white text-zinc-700"
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={currentlyWorking === false}
+                  onClick={() => setCurrentlyWorking(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setCurrentlyWorking(true);
+                      (e.currentTarget.previousElementSibling as HTMLButtonElement)?.focus();
+                    }
+                  }}
+                  className={`rounded border px-4 py-2 ${
+                    currentlyWorking === false
+                      ? "border-blue-600 bg-blue-50 text-blue-800"
+                      : "border-zinc-300 bg-white text-zinc-700"
+                  }`}
+                >
+                  No
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Step 2: Coverage Source */}
         {step === 2 && (
-          <div>
+          <div
+            ref={stepQuestionRef}
+            tabIndex={-1}
+            className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70 outline-none"
+          >
+            <p className="mb-1 text-sm font-medium text-zinc-500">
+              Step 3 of {totalSteps}
+            </p>
             <label htmlFor="coverageSource" className="mb-2 block text-sm font-medium text-zinc-700">
               Where is your current health coverage from?
             </label>
@@ -255,7 +330,14 @@ export default function Home() {
 
         {/* Step 3: Employer Size (if employer coverage) */}
         {step === 3 && showEmployerStep && (
-          <div>
+          <div
+            ref={stepQuestionRef}
+            tabIndex={-1}
+            className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70 outline-none"
+          >
+            <p className="mb-1 text-sm font-medium text-zinc-500">
+              Step 4 of {totalSteps}
+            </p>
             <label htmlFor="employerSize" className="mb-2 block text-sm font-medium text-zinc-700">
               Does the employer have 20 or more employees?
             </label>
@@ -277,33 +359,64 @@ export default function Home() {
 
         {/* Step 3 (if NOT employer) OR Step 4 (if employer): HSA */}
         {((step === 3 && !showEmployerStep) || step === 4) && (
-          <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-700">
-              Are you currently contributing to an HSA?
-            </label>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setContributingToHSA(true)}
-                className={`rounded border px-4 py-2 ${
-                  contributingToHSA === true
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-zinc-300 bg-white text-zinc-700"
-                }`}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                onClick={() => setContributingToHSA(false)}
-                className={`rounded border px-4 py-2 ${
-                  contributingToHSA === false
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-zinc-300 bg-white text-zinc-700"
-                }`}
-              >
-                No
-              </button>
+          <div
+            ref={stepQuestionRef}
+            tabIndex={-1}
+            className="rounded-3xl bg-white p-10 shadow-sm ring-1 ring-zinc-200/70 outline-none"
+          >
+            <p className="mb-1 text-sm font-medium text-zinc-500">
+              Step {step + 1} of {totalSteps}
+            </p>
+            <div
+              role="radiogroup"
+              aria-label="Are you currently contributing to an HSA?"
+              className="flex flex-col gap-2"
+            >
+              <label className="mb-2 block text-sm font-medium text-zinc-700">
+                Are you currently contributing to an HSA?
+              </label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={contributingToHSA === true}
+                  onClick={() => setContributingToHSA(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setContributingToHSA(false);
+                      (e.currentTarget.nextElementSibling as HTMLButtonElement)?.focus();
+                    }
+                  }}
+                  className={`rounded border px-4 py-2 ${
+                    contributingToHSA === true
+                      ? "border-blue-600 bg-blue-50 text-blue-800"
+                      : "border-zinc-300 bg-white text-zinc-700"
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={contributingToHSA === false}
+                  onClick={() => setContributingToHSA(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setContributingToHSA(true);
+                      (e.currentTarget.previousElementSibling as HTMLButtonElement)?.focus();
+                    }
+                  }}
+                  className={`rounded border px-4 py-2 ${
+                    contributingToHSA === false
+                      ? "border-blue-600 bg-blue-50 text-blue-800"
+                      : "border-zinc-300 bg-white text-zinc-700"
+                  }`}
+                >
+                  No
+                </button>
+              </div>
             </div>
           </div>
         )}

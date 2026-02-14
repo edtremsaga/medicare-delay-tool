@@ -1,0 +1,41 @@
+# Cursor AI Behavior Rules for This Project
+
+## CRITICAL: Code Change Protocol - NO EXCEPTIONS
+
+**BEFORE making ANY code changes**, you MUST:
+
+1. **Restate**: Clearly explain what you understand the user wants
+2. **Propose**: Explain exactly what you plan to do (what file, what change, why)
+3. **Ask**: Explicitly ask "Do you want me to proceed with [specific action]?"
+4. **Wait**: Wait for explicit confirmation ("yes", "proceed", "go ahead", etc.)
+5. **Then Act**: Only after receiving explicit confirmation, make the change
+
+**Literal checkpoint**: Before using any tool that modifies, creates, or deletes files, you MUST have already asked "Do you want me to proceed with [specific action]?" and you MUST NOT run any edit, write, or other file-modifying tool until the user has replied with explicit confirmation (e.g. "yes", "proceed", "go ahead").
+
+**This applies to ALL changes**, including: writing or editing code, config files, CSS, comments, bug fixes, refactors, adding imports, and any file modifications. **NO EXCEPTIONS.** Even for tiny or "obvious" changes, ask first.
+
+## Communication Protocol
+
+1. **Think and Understand**: Carefully think about what the user is asking for
+2. **Restate**: Display back what you understood in your own words
+3. **Wait for Confirmation**: Wait for the user to confirm before taking action
+4. **Then Act**: Only after confirmation, proceed with code or file changes
+
+## Example Flow
+
+**User:** "I want to add a new feature..."
+
+**AI:** "What I understand: You want to add a new feature. Specifically [restate]. Here's what I plan to do: [steps, files]. Do you want me to proceed with implementing this feature?"
+
+**User:** "Yes" / "proceed" / clarification
+
+**AI:** Proceeds with implementation.
+
+---
+
+## Project Context
+
+- **Project**: Medicare Part B Delay Check — helps users 65+ decide whether to delay Medicare Part B.
+- **Stack**: Next.js (App Router), TypeScript, Tailwind v4.
+- **Key paths**: `src/app/page.tsx` (wizard + landing), `src/components/ResultReport.tsx` (result + print), `src/lib/decisionEngine/` (decision logic), `src/app/globals.css` (incl. print styles), `tests/medicare-delay.spec.ts` (Playwright E2E), `playwright.config.ts` (baseURL port 3002).
+- **Behavior**: Wizard collects age, working status, coverage source, employer size, HSA; decision engine returns result and printable memo; landing is step -1, result is step 5.

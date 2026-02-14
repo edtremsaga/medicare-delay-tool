@@ -272,6 +272,93 @@ export default function ResultReport({ result, profile, onReviewAnswers }: Props
         ) : null}
       </div>
 
+      {/* Official resources */}
+      <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-200/70">
+        <h3 className="relative pl-4 text-lg font-semibold text-zinc-900 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-full before:bg-slate-400">
+          Official resources
+        </h3>
+        <ul className="mt-3 list-disc space-y-2 pl-6 text-sm leading-6 text-zinc-800">
+          <li>
+            <a
+              href="https://www.medicare.gov/basics/get-started-with-medicare/sign-up/when-can-i-sign-up-for-medicare"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              When can I sign up for Medicare?
+            </a>
+            <span className="block text-zinc-600">
+              Medicare.gov — explains initial and special enrollment periods.
+            </span>
+          </li>
+          <li>
+            <a
+              href="https://www.medicare.gov/basics/costs/medicare-costs/avoid-penalties"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              Avoid late enrollment penalties
+            </a>
+            <span className="block text-zinc-600">
+              Medicare.gov — how to avoid extra costs from signing up late.
+            </span>
+          </li>
+          <li>
+            <a
+              href="https://www.medicare.gov/basics/get-started-with-medicare/medicare-basics/working-past-65/cobra-coverage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              COBRA coverage
+            </a>
+            <span className="block text-zinc-600">
+              Medicare.gov — how COBRA works with Medicare and enrollment timing.
+            </span>
+          </li>
+          <li>
+            <a
+              href="https://www.medicare.gov/publications/10050-medicare-and-you.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              Medicare &amp; You 2026 (PDF)
+            </a>
+            <span className="block text-zinc-600">
+              Official handbook — benefits, costs, and your rights.
+            </span>
+          </li>
+          <li>
+            <a
+              href="https://www.medicare.gov/publications/11036-Enrolling-Part-A-Part-B.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              Enrolling in Medicare Part A &amp; Part B (PDF)
+            </a>
+            <span className="block text-zinc-600">
+              Step-by-step enrollment guide and special situations.
+            </span>
+          </li>
+          <li>
+            <a
+              href="https://www.ssa.gov/medicare/sign-up/part-b-only"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-700 underline hover:text-blue-800"
+            >
+              Sign up for Part B only
+            </a>
+            <span className="block text-zinc-600">
+              SSA — add Part B when you already have Part A.
+            </span>
+          </li>
+        </ul>
+      </div>
+
       {/* Screen-only disclaimer */}
       <div className="no-print pb-6 text-xs leading-5 text-zinc-500">
         This is educational guidance—not legal or medical advice. Always confirm enrollment
